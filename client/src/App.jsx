@@ -1,15 +1,20 @@
 import './App.css'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import AuthPage from "./pages/AuthPage.jsx";
+import Dashboard from './pages/Dashboard.jsx';
+
 
 function App() {
-
   return (
-    <div className='hehe-container'>
-      <h1 class="mx-0 divide-amber-200 font-black">
-        Hehe
-      </h1>
-
-    </div>
-  )
+    <Router>
+      <Routes>
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/register" element={<AuthPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        {/* Add your dashboard and other routes here */}
+      </Routes>
+    </Router>
+  );
 }
 
 export default App
