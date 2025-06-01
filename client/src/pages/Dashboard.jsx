@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import API from "../api/api.js";
 import { useNavigate } from "react-router-dom";
+import AddTransactionModal from "../components/AddTransactionModal.jsx";
+import Analytics from "../components/Analytics.jsx";
+
 
 export default function Dashboard() {
   const [transactions, setTransactions] = useState([]);
@@ -53,7 +56,7 @@ export default function Dashboard() {
     .reduce((sum, t) => sum + t.amount, 0);
 
 
- // Handle LogOut Functionality
+    // Handle LogOut Functionality
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -65,30 +68,144 @@ export default function Dashboard() {
         navigate("/login");
     }
 
+    // Handling Transaction Modal;
+    const [showModal, setShowModal] = useState(false);
+
+    // Function to handle the addition of transactions:
+    const handleAddTransaction = async (form) => {
+        try {
+          const token = localStorage.getItem("token");
+          const res = await API.post(
+            "/transactions",
+            {
+              ...form,
+              amount: Number(form.amount),
+              date: form.date, // Backend expects ISO string or date string
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          setTransactions([res.data, ...transactions]);
+        } catch (err) {
+          alert(
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            "Failed to add transaction."
+          );
+        }
+      };
+
+    //   Handling Deletion of the transactions
+    const handleDeleteTransaction = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this transaction?")) return;
+        try {
+          const token = localStorage.getItem("token");
+          await API.delete(`/transactions/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          // Remove the deleted transaction from state
+          // The useState Hook came into action;   
+          setTransactions(transactions.filter((t) => t._id !== id));
+
+        } catch (err) {
+          alert(
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            "Failed to delete transaction."
+          );
+        }
+      };
+
+
+    //   Handling editing of the transactions
+    const [editTransaction, setEditTransaction] = useState(null);
+
+    const handleEditClick = (transaction) => {
+        setEditTransaction(transaction);
+        setShowModal(true);
+      };
+
+    // The function handling the edits:
+    const handleUpdateTransaction = async (form) => {
+        try {
+          const token = localStorage.getItem("token");
+          const res = await API.put(
+            `/transactions/${editTransaction._id}`,
+            {
+              ...form,
+              amount: Number(form.amount),
+              date: form.date,
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setTransactions(
+            transactions.map((t) =>
+              t._id === editTransaction._id ? res.data : t
+            )
+          );
+          setEditTransaction(null);
+        } catch (err) {
+          alert(
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            "Failed to update transaction."
+          );
+        }
+      };
+      
+      
+
+      
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-10">
-      <div className="container mx-auto max-w-3xl p-6 bg-white rounded-xl shadow-lg">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-3xl font-bold text-indigo-700">
-            Welcome{user ? `, ${user.username}` : ""}!
-        </h1>
-        <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+  <div className="container mx-auto max-w-4xl p-6 bg-white rounded-xl shadow-lg">
+    <div className="flex items-center justify-between mb-4">
+      <h1 className="text-3xl font-bold text-indigo-700">
+        Welcome{user ? `, ${user.username}` : ""}!
+      </h1>
+      <button
+        onClick={handleLogout}
+        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+      >
+        Logout
+      </button>
+    </div>
+
+    {/* Add Transaction Button */}
+    <div className="flex justify-end mb-6">
+    <button
+        onClick={() => {
+            setEditTransaction(null);   // <-- This line ensures the form is empty!
+            setShowModal(true);
+        }}
+        className="bg-indigo-600 text-white px-5 py-2 rounded font-semibold hover:bg-indigo-700 transition"
         >
-            Logout
+        + Add Transaction
         </button>
-        </div>
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-green-100 p-4 rounded-lg">
-            <div className="text-lg text-green-700 font-semibold">Total Income</div>
-            <div className="text-2xl font-bold text-green-800">₹ {totalIncome}</div>
-          </div>
-          <div className="bg-red-100 p-4 rounded-lg">
-            <div className="text-lg text-red-700 font-semibold">Total Expense</div>
-            <div className="text-2xl font-bold text-red-800">₹ {totalExpense}</div>
-          </div>
-        </div>
+
+    </div>
+
+    <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="bg-green-100 p-4 rounded-lg">
+        <div className="text-lg text-green-700 font-semibold">Total Income</div>
+        <div className="text-2xl font-bold text-green-800">₹ {totalIncome}</div>
+      </div>
+      <div className="bg-red-100 p-4 rounded-lg">
+        <div className="text-lg text-red-700 font-semibold">Total Expense</div>
+        <div className="text-2xl font-bold text-red-800">₹ {totalExpense}</div>
+      </div>
+    </div>
+
+    {/* Side-by-side layout for transactions and analytics */}
+    <div className="flex flex-col md:flex-row gap-8">
+      {/* Transaction List */}
+      <div className="md:w-2/3">
         <h2 className="text-xl font-semibold text-indigo-600 mb-2">Recent Transactions</h2>
         {loading ? (
           <div className="text-gray-500">Loading...</div>
@@ -105,18 +222,50 @@ export default function Dashboard() {
                   <div className="text-gray-500 text-sm">{t.description}</div>
                   <div className="text-gray-400 text-xs">{new Date(t.date).toLocaleDateString()}</div>
                 </div>
-                <div
-                  className={`text-lg font-bold ${
-                    t.type === "income" ? "text-green-700" : "text-red-700"
-                  }`}
-                >
-                  {t.type === "income" ? "+" : "-"}₹{t.amount}
+                <div className="flex items-center space-x-3">
+                  <span
+                    className={`text-lg font-bold ${
+                      t.type === "income" ? "text-green-700" : "text-red-700"
+                    }`}
+                  >
+                    {t.type === "income" ? "+" : "-"}₹{t.amount}
+                  </span>
+                  <button
+                    onClick={() => handleDeleteTransaction(t._id)}
+                    className="text-red-500 hover:underline text-sm ml-3"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => handleEditClick(t)}
+                    className="text-indigo-600 hover:underline text-sm ml-3"
+                  >
+                    Edit
+                  </button>
                 </div>
               </li>
             ))}
           </ul>
         )}
       </div>
+
+      {/* Analytics Chart */}
+      <div className="md:w-1/3">
+        <Analytics transactions={transactions} />
+      </div>
     </div>
+  </div>
+
+  {/* Modal */}
+  <AddTransactionModal
+    open={showModal}
+    onClose={() => setShowModal(false)}
+    onAdd={handleAddTransaction}
+    onUpdate={handleUpdateTransaction}
+    initialData={editTransaction}
+    editMode={!!editTransaction}
+  />
+</div>
+
   );
 }
