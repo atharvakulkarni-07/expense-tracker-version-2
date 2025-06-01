@@ -247,6 +247,33 @@ export default function Dashboard() {
             ))}
           </ul>
         )}
+
+        {/* If transactions are less than 5, show an empty state below */}
+      {transactions.length < 5 && (
+        <div className="mt-12 flex flex-col items-center text-gray-400">
+          <img
+            src="hehehehe.png"
+            alt="More space"
+            className="w-32 h-32 mb-4 opacity-80"
+          />
+          <div className="text-lg font-medium">
+            Room for more transactions!
+          </div>
+          <div className="text-sm mt-1">
+            Track all your expenses and see even more insights here.
+          </div>
+          <button
+            onClick={() => {
+              setEditTransaction(null);
+              setShowModal(true);
+            }}
+            className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+          >
+            + Add Transaction
+          </button>
+        </div>
+      )}
+        
       </div>
 
       {/* Analytics Chart */}
