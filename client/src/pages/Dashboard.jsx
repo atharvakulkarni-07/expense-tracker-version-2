@@ -64,8 +64,8 @@ export default function Dashboard() {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         
-        // Navigate to Login Page back again.
-        navigate("/login");
+        // Navigate to HomePage back again.
+        navigate("/");
     }
 
     // Handling Transaction Modal;
@@ -157,10 +157,6 @@ export default function Dashboard() {
           );
         }
       };
-      
-      
-
-      
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-10">
