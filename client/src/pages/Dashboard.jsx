@@ -158,6 +158,57 @@ export default function Dashboard() {
         }
       };
 
+// Function to create the file in CSV
+
+function transactionsToCSV(transactions) {
+  if (!transactions.length) return "";
+
+  // Define the columns you want to export
+  const headers = [
+    "Date",
+    "Type",
+    "Category",
+    "Amount",
+    "Description",
+    "Payment Method",
+    "Status"
+  ];
+
+  // Create CSV rows
+  const rows = transactions.map(t =>
+    [
+      new Date(t.date).toLocaleDateString(),
+      t.type,
+      t.category,
+      t.amount,
+      t.description,
+      t.paymentMethod,
+      t.status
+    ].map(field => `"${(field ?? "").toString().replace(/"/g, '""')}"`).join(",")
+  );
+
+  // Combine headers and rows
+  return [headers.join(","), ...rows].join("\r\n");
+}
+
+// Function to Download the CSV File:
+
+function downloadCSV() {
+  const csv = transactionsToCSV(transactions);
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = window.URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "transactions.csv";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
+
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-10">
   <div className="container mx-auto max-w-4xl p-6 bg-white rounded-xl shadow-lg">
@@ -174,8 +225,8 @@ export default function Dashboard() {
     </div>
 
     {/* Add Transaction Button */}
-    <div className="flex justify-end mb-6">
-    <button
+    <div className="flex justify-end mb-6 gap-4">
+      <button
         onClick={() => {
             setEditTransaction(null);   // <-- This line ensures the form is empty!
             setShowModal(true);
@@ -183,8 +234,14 @@ export default function Dashboard() {
         className="bg-indigo-600 text-white px-5 py-2 rounded font-semibold hover:bg-indigo-700 transition"
         >
         + Add Transaction
-        </button>
+      </button>
 
+      <button
+        onClick={downloadCSV}
+        className="bg-green-600 text-white px-5 py-2 rounded font-semibold hover:bg-green-700 transition"
+      >
+        Export to CSV
+      </button>
     </div>
 
     <div className="grid grid-cols-2 gap-4 mb-8">
