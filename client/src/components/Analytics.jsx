@@ -60,6 +60,41 @@ export default function Analytics({ transactions }) {
 
   return (
     <div className="space-y-8">
+
+      {/* Expenses by Category Pie Chart */}
+      <div className="bg-white rounded-xl shadow p-6 mb-8">
+        <h3 className="text-lg font-semibold mb-4 text-indigo-700">
+          Expenses by Category
+        </h3>
+        {pieData.length === 0 ? (
+          <div className="text-gray-500">No expense data to display.</div>
+        ) : (
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) =>
+                  `${name}: ${(percent * 100).toFixed(0)}%`
+                }
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+
       {/* Monthly Expense & Income Trends */}
       <div className="bg-white rounded-xl shadow p-6 mb-8">
         <h3 className="text-lg font-semibold mb-4 text-indigo-700">
@@ -96,38 +131,7 @@ export default function Analytics({ transactions }) {
         )}
       </div>
 
-      {/* Expenses by Category Pie Chart */}
-      <div className="bg-white rounded-xl shadow p-6 mb-8">
-        <h3 className="text-lg font-semibold mb-4 text-indigo-700">
-          Expenses by Category
-        </h3>
-        {pieData.length === 0 ? (
-          <div className="text-gray-500">No expense data to display.</div>
-        ) : (
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) =>
-                  `${name}: ${(percent * 100).toFixed(0)}%`
-                }
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        )}
-      </div>
+      
     </div>
   );
 }

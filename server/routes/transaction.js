@@ -7,26 +7,31 @@ const router = express.Router();
 // Create POST request; (creating a new transaction)
 router.post('/', auth, async (req,res) => {
     try{
-        // extract out stuff from here;
-        const {amount, category, type, description, paymentMethod, status} = req.body;
+        console.log("🔍 Request body received:", req.body); // Debug line
+        const {product, amount, category, type, description, paymentMethod, status} = req.body;
+        
+        console.log("🔍 Extracted fields:", {product, amount, category, type}); // Debug line
 
-        // now we create a transaction object and add the above things we extracted from the post request
         const transaction = await Transaction.create({
-            user: req.user.id, // obtained from JWT Middleware
+            user: req.user.id,
+            product,           
             amount,
             category,
             type,
             description,
             paymentMethod,
-            status: status || 'cleared', // default to 'cleared'
+            status: status || 'cleared',
             date: req.body.date || Date.now()
-        })
+        });
 
         res.status(201).json(transaction);
     }catch(err){
-        res.status(400).json({ error: "Trasaction creation failed!"});
+        console.error("❌ Backend error:", err.message); // Debug line
+        console.error("❌ Full error:", err); // Debug line
+        res.status(400).json({ error: "Transaction creation failed!", details: err.message});
     }
-}); 
+}); 
+
 
 // Create a GET request; (getting all transactions)
 router.get('/', auth, async(req,res) => {

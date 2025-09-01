@@ -9,6 +9,7 @@ export default function AddTransactionModal({
   editMode,
 }) {
   const [form, setForm] = useState({
+    product: "",
     amount: "",
     category: "",
     type: "expense",
@@ -27,6 +28,7 @@ export default function AddTransactionModal({
       });
     } else {
       setForm({
+        product: "",
         amount: "",
         category: "",
         type: "expense",
@@ -44,7 +46,7 @@ export default function AddTransactionModal({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.amount || !form.category || !form.type || !form.date) {
+    if (!form.product || !form.amount || !form.category || !form.type || !form.date) {
       setError("Please fill all required fields.");
       return;
     }
@@ -55,6 +57,7 @@ export default function AddTransactionModal({
       onAdd(form);
     }
     setForm({
+      product: "",
       amount: "",
       category: "",
       type: "expense",
@@ -79,6 +82,18 @@ export default function AddTransactionModal({
         </button>
         <h2 className="text-xl font-bold mb-4 text-indigo-700">Add Transaction</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-gray-700 mb-1">Item/Service *</label>
+            <input
+              type="text"
+              name="product"
+              value={form.product}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+              min="1"
+              required
+            />
+          </div>
           <div>
             <label className="block text-gray-700 mb-1">Amount *</label>
             <input

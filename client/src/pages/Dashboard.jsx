@@ -73,6 +73,8 @@ export default function Dashboard() {
 
     // Function to handle the addition of transactions:
     const handleAddTransaction = async (form) => {
+
+      console.log("🚀 Sending form data:", form);
         try {
           const token = localStorage.getItem("token");
           const res = await API.post(
@@ -90,11 +92,8 @@ export default function Dashboard() {
           );
           setTransactions([res.data, ...transactions]);
         } catch (err) {
-          alert(
-            err.response?.data?.error ||
-            err.response?.data?.message ||
-            "Failed to add transaction."
-          );
+          console.error("❌ Frontend error:", err.response?.data); // Debug line
+          alert(err.response?.data?.error || "Failed to add transaction.");
         }
       };
 
@@ -166,6 +165,7 @@ function transactionsToCSV(transactions) {
   // Define the columns you want to export
   const headers = [
     "Date",
+    "Product",
     "Type",
     "Category",
     "Amount",
@@ -178,6 +178,7 @@ function transactionsToCSV(transactions) {
   const rows = transactions.map(t =>
     [
       new Date(t.date).toLocaleDateString(),
+      t.product,
       t.type,
       t.category,
       t.amount,
@@ -271,6 +272,7 @@ function downloadCSV() {
             {transactions.slice(0, 5).map((t) => (
               <li key={t._id} className="py-3 flex justify-between items-center">
                 <div>
+                <div className="font-medium">{t.product}</div>
                   <div className="font-medium">{t.category}</div>
                   <div className="text-gray-500 text-sm">{t.description}</div>
                   <div className="text-gray-400 text-xs">{new Date(t.date).toLocaleDateString()}</div>
@@ -302,30 +304,30 @@ function downloadCSV() {
         )}
 
         {/* If transactions are less than 5, show an empty state below */}
-      {transactions.length < 5 && (
-        <div className="mt-12 flex flex-col items-center text-gray-400">
-          <img
-            src="hehehehe.png"
-            alt="More space"
-            className="w-32 h-32 mb-4 opacity-80"
-          />
-          <div className="text-lg font-medium">
-            Room for more transactions!
+        {transactions.length < 5 && (
+          <div className="mt-12 flex flex-col items-center text-gray-400">
+            <img
+              src="hehehehe.png"
+              alt="More space"
+              className="w-32 h-32 mb-4 opacity-80"
+            />
+            <div className="text-lg font-medium">
+              Room for more transactions!
+            </div>
+            <div className="text-sm mt-1">
+              Track all your expenses and see even more insights here.
+            </div>
+            <button
+              onClick={() => {
+                setEditTransaction(null);
+                setShowModal(true);
+              }}
+              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+            >
+              + Add Transaction
+            </button>
           </div>
-          <div className="text-sm mt-1">
-            Track all your expenses and see even more insights here.
-          </div>
-          <button
-            onClick={() => {
-              setEditTransaction(null);
-              setShowModal(true);
-            }}
-            className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-          >
-            + Add Transaction
-          </button>
-        </div>
-      )}
+        )}
         
       </div>
 
