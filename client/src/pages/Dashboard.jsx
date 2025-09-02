@@ -272,7 +272,7 @@ function downloadCSV() {
             {transactions.slice(0, 5).map((t) => (
               <li key={t._id} className="py-3 flex justify-between items-center">
                 <div>
-                <div className="font-medium">{t.product}</div>
+                <div className="font-semibold text-black-800">{t.product}</div>
                   <div className="font-medium">{t.category}</div>
                   <div className="text-gray-500 text-sm">{t.description}</div>
                   <div className="text-gray-400 text-xs">{new Date(t.date).toLocaleDateString()}</div>
